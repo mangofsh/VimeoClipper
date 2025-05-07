@@ -145,6 +145,9 @@
         <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="generateEnhanced()">Regenerate with Enrichment</button>
       </div>
     </div>
+
+    <button onclick="saveUserProfile()" class="bg-primary text-white px-4 py-2 rounded">💾 Save Profile</button>
+
   </div>
 
   <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden flex items-center justify-center z-50">
@@ -200,20 +203,47 @@ He is known as a **thoughtful collaborator**, **educator-mentor**, and a **conne
     let currentProfileCode = null;
     let isEditing = false;
 
-    function checkProfile() {
+    // Function to fetch member data from Lambda API
+    async function fetchMemberData(code) {
+      try {
+        const response = await fetch("https://7iq66xj2jh.execute-api.us-east-1.amazonaws.com/dev/fetch-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          return result.content || null;  // `content` is expected if successful
+        } else {
+          console.error("API Error:", result.error);
+          return null;
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        return null;
+      }
+    }
+
+
+    async function checkProfile() {
       const code = document.getElementById("profileCode").value.trim();
       if (!code) return alert("Enter a profile code.");
       currentProfileCode = code;
       document.getElementById("profileSection").classList.remove("hidden");
 
-      if (mockDatabase[code]) {
-        currentProfileMarkdown = mockDatabase[code];
+      const content = await fetchMemberData(code);
+
+      if (content) {
+        alert("Fetched Member:", content);
+        currentProfileMarkdown = content;
         renderMarkdown(currentProfileMarkdown);
         document.getElementById("initialButtonContainer").classList.add("hidden");
         document.getElementById("enrichmentSection").classList.remove("hidden");
         document.getElementById("editControls").classList.remove("hidden");
         document.getElementById("statusMessage").innerText = `✅ Loaded profile for ${code}`;
       } else {
+        alert("No content found for code:", code, "Creating new profile.");
         document.getElementById("initialButtonContainer").classList.remove("hidden");
         document.getElementById("generatedOutput").classList.add("hidden");
         document.getElementById("enrichmentSection").classList.add("hidden");
@@ -222,6 +252,42 @@ He is known as a **thoughtful collaborator**, **educator-mentor**, and a **conne
         document.getElementById("statusMessage").innerText = `🆕 Creating new profile for ${code}`;
       }
     }
+
+    async function saveUserProfile() {
+      const code = currentProfileCode;
+      const content = currentProfileMarkdown;
+
+      let response = await fetch("https://7iq66xj2jh.execute-api.us-east-1.amazonaws.com/dev/create-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, content })
+      });
+
+      let result = await response.json();
+
+      if (response.status === 409 && result.overwriteable) {
+        const confirmOverwrite = confirm("A profile already exists. Overwrite it?");
+        if (!confirmOverwrite) return;
+
+        // Retry with overwrite = true
+        response = await fetch("https://7iq66xj2jh.execute-api.us-east-1.amazonaws.com/dev/create-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, content, overwrite: true })
+        });
+
+        result = await response.json();
+      }
+
+      if (response.ok) {
+        alert("✅ Profile saved.");
+      } else {
+        alert("❌ Save failed: " + (result.error || "Unknown error."));
+      }
+    }
+
+
+
 
     async function downloadVideo() {
       const videoId = document.getElementById("VideoID").value.trim();
