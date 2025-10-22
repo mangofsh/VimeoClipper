@@ -180,6 +180,21 @@
     let currentVideoLength = null;
     let isEditing = false;
 
+<<<<<<< HEAD
+    function checkVideo() {
+      const videoLength = document.getElementById("videoLength").value.trim();
+      const minLength = document.getElementById("minClipLength").value.trim();
+      const maxLength = document.getElementById("maxClipLength").value.trim();
+      const numClips = document.getElementById("numberOfClips").value.trim();
+      
+      if (!videoLength) return alert("Enter video length.");
+      if (!minLength) return alert("Enter minimum clip length.");
+      if (!maxLength) return alert("Enter maximum clip length.");
+      if (!numClips) return alert("Enter number of clips.");
+      
+      if (parseInt(minLength) >= parseInt(maxLength)) {
+        return alert("Minimum clip length must be less than maximum clip length.");
+=======
     // Function to fetch member data from Lambda API
     async function fetchMemberData(code) {
       try {
@@ -202,38 +217,6 @@
       }
     }
 
-    function checkVideo() {
-      const videoLength = document.getElementById("videoLength").value.trim();
-      const minLength = document.getElementById("minClipLength").value.trim();
-      const maxLength = document.getElementById("maxClipLength").value.trim();
-      const numClips = document.getElementById("numberOfClips").value.trim();
-      
-      if (!videoLength) return alert("Enter video length.");
-      if (!minLength) return alert("Enter minimum clip length.");
-      if (!maxLength) return alert("Enter maximum clip length.");
-      if (!numClips) return alert("Enter number of clips.");
-      
-      if (parseInt(minLength) >= parseInt(maxLength)) {
-        return alert("Minimum clip length must be less than maximum clip length.");
-      }
-      
-      if (parseInt(maxLength) > parseInt(videoLength)) {
-        return alert(`Maximum clip length (${maxLength}s) cannot exceed video length (${videoLength}s).`);
-      }
-      
-      if (parseInt(numClips) * parseInt(minLength) > parseInt(videoLength)) {
-        return alert(`Cannot create ${numClips} clips of minimum ${minLength}s each in a ${videoLength}s video. Total minimum time would be ${parseInt(numClips) * parseInt(minLength)}s.`);
-      }
-      
-      currentVideoLength = videoLength;
-      document.getElementById("videoSection").classList.remove("hidden");
-      document.getElementById("initialButtonContainer").classList.remove("hidden");
-      document.getElementById("generatedOutput").classList.add("hidden");
-      document.getElementById("enrichmentSection").classList.add("hidden");
-      document.getElementById("editControls").classList.add("hidden");
-      document.getElementById("contextSection").classList.remove("hidden");
-      document.getElementById("statusMessage").innerText = `🆕 Ready to generate timestamps for ${videoLength}-second video`;
-    }
 
     async function checkProfile() {
       const code = document.getElementById("profileCode").value.trim();
@@ -259,7 +242,25 @@
         document.getElementById("editControls").classList.add("hidden");
         document.getElementById("contextSection").classList.remove("hidden");
         document.getElementById("statusMessage").innerText = `🆕 Creating new profile for ${code}`;
+>>>>>>> 003f4f3c410629e05c6d7e76ae356f990bb31796
       }
+      
+      if (parseInt(maxLength) > parseInt(videoLength)) {
+        return alert(`Maximum clip length (${maxLength}s) cannot exceed video length (${videoLength}s).`);
+      }
+      
+      if (parseInt(numClips) * parseInt(minLength) > parseInt(videoLength)) {
+        return alert(`Cannot create ${numClips} clips of minimum ${minLength}s each in a ${videoLength}s video. Total minimum time would be ${parseInt(numClips) * parseInt(minLength)}s.`);
+      }
+      
+      currentVideoLength = videoLength;
+      document.getElementById("videoSection").classList.remove("hidden");
+      document.getElementById("initialButtonContainer").classList.remove("hidden");
+      document.getElementById("generatedOutput").classList.add("hidden");
+      document.getElementById("enrichmentSection").classList.add("hidden");
+      document.getElementById("editControls").classList.add("hidden");
+      document.getElementById("contextSection").classList.remove("hidden");
+      document.getElementById("statusMessage").innerText = `🆕 Ready to generate timestamps for ${videoLength}-second video`;
     }
 
     async function saveUserProfile() {
