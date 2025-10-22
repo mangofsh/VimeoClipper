@@ -1,5 +1,5 @@
 *.mp4
 .venv
 .env
-*.txt
+transcript_output.txt
 transcript.json
