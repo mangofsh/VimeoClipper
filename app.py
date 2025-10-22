@@ -60,7 +60,7 @@ def generate_profile():
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are an expert profile generation assistant."},
+              {"role": "system", "content": "You are an expert profile generation assistant."},
                 {"role": "user", "content": prompt_text}
             ],
             temperature=0.4

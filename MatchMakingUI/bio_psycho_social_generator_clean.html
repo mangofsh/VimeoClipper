@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bio-Psycho-Social Profile Builder</title>
+  <title>Vimeo Video Clipper - Timestamp Generator</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -104,16 +104,35 @@
 </head>
 <body class="dark bg-gray-900 text-gray-100">
   <div class="max-w-3xl mx-auto mt-12 bg-gray-800 shadow-xl rounded-lg p-8">
-    <h1 class="text-2xl font-semibold mb-6">🧠 Bio-Psycho-Social Business Profile Builder</h1>
+    <h1 class="text-2xl font-semibold mb-6">VIMEO VIDEO CLIPPER</h1>
+    <p class="text-gray-400 mb-6">Generate timestamps for the most relevant parts of your Vimeo video</p>
 
-    <label for="profileCode" class="block font-medium mb-1 text-gray-300">Assign or Retrieve Profile Code (e.g., ya214):</label>
-    <input type="text" id="profileCode" placeholder="Enter profile code"
+    <label for="videoLength" class="block font-medium mb-1 text-gray-300">Video Length (in seconds):</label>
+    <input type="number" id="videoLength" placeholder="1744" min="1" max="7200"
            class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white mb-4 placeholder-gray-500" />
-    <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="checkProfile()">Continue</button>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label for="minClipLength" class="block font-medium mb-1 text-gray-300">Min Clip Length (seconds):</label>
+        <input type="number" id="minClipLength" placeholder="30" min="10" max="300"
+               class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500" />
+      </div>
+      <div>
+        <label for="maxClipLength" class="block font-medium mb-1 text-gray-300">Max Clip Length (seconds):</label>
+        <input type="number" id="maxClipLength" placeholder="120" min="30" max="600"
+               class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500" />
+      </div>
+      <div>
+        <label for="numberOfClips" class="block font-medium mb-1 text-gray-300">Number of Clips:</label>
+        <input type="number" id="numberOfClips" placeholder="5" min="1" max="20"
+               class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500" />
+      </div>
+    </div>
+    <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="checkVideo()">Continue</button>
 
     <p id="statusMessage" class="mt-4 text-sm text-gray-400 font-medium"></p>
 
-    <div id="profileSection" class="hidden mt-8">
+    <div id="videoSection" class="hidden mt-8">
       <div id="generatedOutput" class="bg-gray-700 p-6 rounded-md"></div>
 
       <div id="editControls" class="hidden mt-4 flex gap-3">
@@ -127,22 +146,22 @@
       </div>
 
       <div id="contextSection" class="hidden mt-8">
-        <h2 class="text-lg font-semibold mb-2 text-white">📘 Important Context</h2>
+        <h2 class="text-lg font-semibold mb-2 text-white">📘 Clip Focus Areas</h2>
         <textarea
           id="userContext"
-          placeholder="Any key points or background to consider…"
+          placeholder="Describe what topics, moments, or content you want to highlight in the clips (e.g., 'key insights about AI implementation', 'product demonstrations', 'customer testimonials')…"
           class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500 mb-4 resize-y"
           style="min-height: 6rem;"
         ></textarea>
-        <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="downloadVideo()">Generate Initial Profile</button>
+        <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="downloadVideo()">Generate Timestamps</button>
 
       </div>      
 
       <div id="enrichmentSection" class="hidden mt-8">
-        <h2 class="text-lg font-semibold mb-2 text-white">📝 Enrichment Notes</h2>
-        <textarea id="userEnrichment" placeholder="Add enrichment here..."
+        <h2 class="text-lg font-semibold mb-2 text-white">📝 Refinement Notes</h2>
+        <textarea id="userEnrichment" placeholder="Add any additional focus areas or refinements for the clip selection..."
                   class="w-full p-3 border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500 mb-4 h-32"></textarea>
-        <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="generateEnhanced()">Regenerate with Enrichment</button>
+        <button class="bg-primary text-white px-4 py-2 rounded hover:bg-emerald-600 transition" onclick="generateEnhanced()">Regenerate Timestamps</button>
       </div>
     </div>
   </div>
@@ -152,75 +171,43 @@
   </div>
 
   <script>
-/*
-    const intakeData = {
-      individualName: "Dr. Ayaan Malik",
-      businessName: "NeuroFocus Clinics",
-      profession: "Neurologist and Private Practice Owner",
-      placeOfWork: "Dallas, TX",
-      workIssues: "Wants to attract more patients online and automate appointment scheduling",
-      serviceNeeds: "Marketing, web design, CRM tools"
-    };
-*/
-    const mockDatabase = {
-        ya214: `# Bio-Psycho-Social Business Profile
 
-## Bio  
-**Name:** Yusef Alimam  
-**Profession:** Medical AI Strategist, CTO, Educator  
-**Business Name:** Green Medical Network Group  
-**Place of Work:** Global / Remote
 
-## Psycho  
-Yusef Alimam is driven by a deep belief in using AI to solve meaningful problems in healthcare and education. With dual strengths in biomedical science and artificial intelligence, he thrives at the intersection of innovation and impact.  
-His inner motivation stems from the desire to build systems that are not just efficient, but ethical — aiming to reduce friction in care delivery and elevate clinical intelligence.  
-He is intellectually curious, systems-oriented, and constantly learning to refine both himself and the tools he builds.
-
-## Social  
-Alimam is embedded in a highly interdisciplinary and international network — with active ties in **San Diego, Bahrain, Dallas**, and multiple **global innovation hubs**.  
-His social presence spans **startups**, **faith-based initiatives**, **academic ecosystems**, and **high-performing medical networks**.  
-He is known as a **thoughtful collaborator**, **educator-mentor**, and a **connector** between technical and clinical worlds.
-
-## Business Needs
-- **AI Automation for Healthcare:** Building or partnering with tools that use LLMs and computer vision to improve workflows in radiology, memory clinics, and administrative processes.  
-- **Strategic Partnerships:** Identifying early-stage ventures that align with ethical medical AI.  
-- **Scalable Revenue Streams:** Designing platforms or licensing models for white-labeled AI infrastructure (e.g., *Muse* for eyewear, *RLA* for supply chains).  
-- **Networked Intelligence:** Integrating data from hundreds of physicians into shared knowledge systems and patient-enabling interfaces.  
-- **Delegation & Offshore Teams:** Efficiently managing vetted remote contributors in design, engineering, and content ops.
-
-## Income  
-**Estimated Annual Income:** $120K
-
-## Opportunities
-- Can organize business relationships with hungry doctors to help them build their own AI tools.  
-- Interested in investing in **early-stage biotech** in **Europe**.`
-    };
-
-    let currentProfileMarkdown = null;
-    let currentProfileCode = null;
+    let currentTimestampMarkdown = null;
+    let currentVideoLength = null;
     let isEditing = false;
 
-    function checkProfile() {
-      const code = document.getElementById("profileCode").value.trim();
-      if (!code) return alert("Enter a profile code.");
-      currentProfileCode = code;
-      document.getElementById("profileSection").classList.remove("hidden");
-
-      if (mockDatabase[code]) {
-        currentProfileMarkdown = mockDatabase[code];
-        renderMarkdown(currentProfileMarkdown);
-        document.getElementById("initialButtonContainer").classList.add("hidden");
-        document.getElementById("enrichmentSection").classList.remove("hidden");
-        document.getElementById("editControls").classList.remove("hidden");
-        document.getElementById("statusMessage").innerText = `✅ Loaded profile for ${code}`;
-      } else {
-        document.getElementById("initialButtonContainer").classList.remove("hidden");
-        document.getElementById("generatedOutput").classList.add("hidden");
-        document.getElementById("enrichmentSection").classList.add("hidden");
-        document.getElementById("editControls").classList.add("hidden");
-        document.getElementById("contextSection").classList.remove("hidden");
-        document.getElementById("statusMessage").innerText = `🆕 Creating new profile for ${code}`;
+    function checkVideo() {
+      const videoLength = document.getElementById("videoLength").value.trim();
+      const minLength = document.getElementById("minClipLength").value.trim();
+      const maxLength = document.getElementById("maxClipLength").value.trim();
+      const numClips = document.getElementById("numberOfClips").value.trim();
+      
+      if (!videoLength) return alert("Enter video length.");
+      if (!minLength) return alert("Enter minimum clip length.");
+      if (!maxLength) return alert("Enter maximum clip length.");
+      if (!numClips) return alert("Enter number of clips.");
+      
+      if (parseInt(minLength) >= parseInt(maxLength)) {
+        return alert("Minimum clip length must be less than maximum clip length.");
       }
+      
+      if (parseInt(maxLength) > parseInt(videoLength)) {
+        return alert(`Maximum clip length (${maxLength}s) cannot exceed video length (${videoLength}s).`);
+      }
+      
+      if (parseInt(numClips) * parseInt(minLength) > parseInt(videoLength)) {
+        return alert(`Cannot create ${numClips} clips of minimum ${minLength}s each in a ${videoLength}s video. Total minimum time would be ${parseInt(numClips) * parseInt(minLength)}s.`);
+      }
+      
+      currentVideoLength = videoLength;
+      document.getElementById("videoSection").classList.remove("hidden");
+      document.getElementById("initialButtonContainer").classList.remove("hidden");
+      document.getElementById("generatedOutput").classList.add("hidden");
+      document.getElementById("enrichmentSection").classList.add("hidden");
+      document.getElementById("editControls").classList.add("hidden");
+      document.getElementById("contextSection").classList.remove("hidden");
+      document.getElementById("statusMessage").innerText = `🆕 Ready to generate timestamps for ${videoLength}-second video`;
     }
 
     async function downloadVideo() {
@@ -230,7 +217,7 @@ He is known as a **thoughtful collaborator**, **educator-mentor**, and a **conne
         return;
       }
       
-      document.getElementById("statusMessage").innerText = "⏳ Generating Profile... (May take up to 5 minutes)";
+      document.getElementById("statusMessage").innerText = "⏳ Analyzing video for best clips... (May take up to 5 minutes)";
       document.getElementById("loadingOverlay").classList.remove("hidden");
 
       try {
@@ -243,7 +230,7 @@ He is known as a **thoughtful collaborator**, **educator-mentor**, and a **conne
         const result = await response.json();
 
         if (response.ok && result.success) {
-          document.getElementById("statusMessage").innerText = "✅ Pipeline executed successfully.";
+          document.getElementById("statusMessage").innerText = "✅ Video analysis completed successfully.";
           generateInitial(result.transcript, result.metadata);
         } else {
           document.getElementById("statusMessage").innerText = `❌ Error: ${result.error}`;
@@ -262,48 +249,51 @@ He is known as a **thoughtful collaborator**, **educator-mentor**, and a **conne
     async function generateInitial(transcript, metadata) {
 
       const contextNotes = document.getElementById("userContext").value.trim();
-      document.getElementById("statusMessage").innerText = "⏳ Almost Ready...";
+      const minLength = document.getElementById("minClipLength").value.trim();
+      const maxLength = document.getElementById("maxClipLength").value.trim();
+      const numClips = document.getElementById("numberOfClips").value.trim();
+      
+      document.getElementById("statusMessage").innerText = "⏳ Analyzing video for best clips...";
       document.getElementById("loadingOverlay").classList.remove("hidden");
 
       const prompt = `
+You are an expert Video Content Analyzer. Your PRIMARY task is to find video clips that specifically match what the user is looking for.
 
-### Important Context:
-${contextNotes}
+**🎯 PRIMARY FOCUS: The user wants clips about: "${contextNotes}"**
+**This is the MOST IMPORTANT requirement - prioritize clips that directly relate to these topics.**
 
-You are an expert profile generation assistant. Your task is to analyze the provided interview transcript, video metadata (which likely contains the interviewee's name and important background information), and contextNotes to identify the primary speaker being interviewed. Then, generate a structured and comprehensive Bio-Psycho-Social Business Profile for this individual. As you build the profile, **weave those contextNotes insights explicitly** into every section.
-The interviewee is not yet affiliated with GMNG. The profile should precisely follow the given structure below. For Income and Opportunities, write 'INPUT HERE':
+**CRITICAL CONSTRAINT: The total video length is ${currentVideoLength} seconds (${Math.floor(currentVideoLength / 60)}:${(currentVideoLength % 60).toString().padStart(2, '0')}). ALL timestamps must be within this duration.**
 
+**ANALYSIS INSTRUCTIONS:**
+1. FIRST: Scan the transcript for sections that directly discuss or relate to: "${contextNotes}"
+2. SECOND: Identify the most relevant moments that match the user's specific interests
+3. THIRD: Select clips that best represent what the user is looking for
 
-# Bio-Psycho-Social Business Profile
+**Requirements:**
+- Each clip should be between ${minLength} and ${maxLength} seconds long
+- ALL timestamps must be within the video duration of ${currentVideoLength} seconds
+- **PRIORITIZE clips that directly relate to: "${contextNotes}"**
+- If no content matches the user's focus areas, select the most relevant general content
+- Avoid repetitive or less important content
+- Ensure clips have clear start and end points with meaningful content
+- Do NOT generate timestamps that exceed the video length
 
-## Bio
-**Name:** [Extract from metadata or transcript]
-**Profession:** [Clearly define based on intake]
-**Business Name:** [Include if available, or state as "INPUT HERE"]
-**Place of Work:** [Specify if available. Only if student, include School/University or place of internship]
+Output Format:
+Provide timestamps in the following format for each clip:
 
-## Psycho
-Describe psychological characteristics, personality traits, motivations, and mindset derived from the conversation.
+# Video Clip Timestamps
 
-## Social
-Outline social connections, networks, interpersonal dynamics, or community involvement mentioned or inferred —**drawing on contextNotes** for deeper nuance.
+## Clip 1: [Brief description of what happens in this clip]
+**Start:** [MM:SS]
+**End:** [MM:SS]
+**Duration:** [X seconds]
 
-## Business Needs
-Identify key business challenges, goals, priorities, or specific support needs explicitly or implicitly mentioned.
+## Clip 2: [Brief description of what happens in this clip]
+**Start:** [MM:SS]
+**End:** [MM:SS]
+**Duration:** [X seconds]
 
-## Income
-INPUT HERE (unless expilitly stated)
-
-## Opportunities
-INPUT HERE
-
-## Key Industry
-Select only one or more from the provided industry list. Do not add anything more:
- - Real Estate
- - Entrepreneurship (other)
- - Technology
- - Medicine
-
+[Continue for all ${numClips} clips]
 
 ### Video Metadata:
 ${metadata}
@@ -311,20 +301,33 @@ ${metadata}
 ### Transcript:
 ${transcript}
 
+### 🎯 USER'S SPECIFIC FOCUS AREAS - PRIORITIZE THESE TOPICS:
+**"${contextNotes}"**
 
-Ensure the profile is accurate, coherent, **and richly informed by the contextNotes**, insightful, and structured exactly as instructed. The target audience is a potential client, employer or buisness partner.
+**IMPORTANT: The clips you select MUST be relevant to these specific topics. If the video doesn't contain content about these topics, explain why and select the most relevant alternative content.**
+
+### Video Length: ${currentVideoLength} seconds (${Math.floor(currentVideoLength / 60)}:${(currentVideoLength % 60).toString().padStart(2, '0')})
+### Minimum Clip Length: ${minLength} seconds
+### Maximum Clip Length: ${maxLength} seconds
+### Number of Clips Requested: ${numClips}
+
+**IMPORTANT: Double-check that all timestamps are within the ${currentVideoLength}-second video duration. The maximum possible timestamp should be ${Math.floor((currentVideoLength - 1) / 60)}:${((currentVideoLength - 1) % 60).toString().padStart(2, '0')}.**
+
+**FINAL REMINDER: The user specifically wants clips about "${contextNotes}". Make sure your selected clips directly relate to these topics. If you cannot find content matching these topics, explain why and select the most relevant alternative content. Recheck to make sure the time stamps you chose actually include the content wanted by the user.**
 
     `.trim();
 
+
+
       const content = await fetchFromOpenAI(prompt);
-      currentProfileMarkdown = content;
+      currentTimestampMarkdown = content;
       renderMarkdown(content);
       document.getElementById("initialButtonContainer").classList.add("hidden");
       document.getElementById("contextSection").classList.add("hidden");
       document.getElementById("enrichmentSection").classList.remove("hidden");
       document.getElementById("editControls").classList.remove("hidden");
       document.getElementById("loadingOverlay").classList.add("hidden");
-      document.getElementById("statusMessage").innerText = `✅ Profile created for ${currentProfileCode}`;
+      document.getElementById("statusMessage").innerText = `✅ Timestamps generated for ${currentVideoLength}-second video`;
     }
 
     async function generateEnhanced() {
@@ -333,40 +336,75 @@ Ensure the profile is accurate, coherent, **and richly informed by the contextNo
         if (save) saveEdits(); else return;
       }
 
-      document.getElementById("statusMessage").innerText = "⏳ Enriching profile...";
+      document.getElementById("statusMessage").innerText = "⏳ Refining timestamps...";
       document.getElementById("loadingOverlay").classList.remove("hidden");
 
       const contextNotes = document.getElementById("userContext").value.trim();
       const notes = document.getElementById("userEnrichment").value;
+      const minLength = document.getElementById("minClipLength").value.trim();
+      const maxLength = document.getElementById("maxClipLength").value.trim();
+      const numClips = document.getElementById("numberOfClips").value.trim();
+      
       const prompt = `
-You're an enrichment assistant. Merge the analyst's additions into the markdown profile.
+You are an expert Video Content Analyzer. Refine the existing timestamps based on the user's additional feedback and focus areas.
 
-## Bio  
-## Psycho  
-## Social  
-## Business Needs  
-## Income  
-## Opportunities
-## Key Industry
+**🎯 PRIMARY FOCUS: The user wants clips about: "${contextNotes}"**
+**This is the MOST IMPORTANT requirement - prioritize clips that directly relate to these topics.**
 
-Do NOT add comments, sections or break structure. Just return the enriched markdown.
+**CRITICAL CONSTRAINT: The total video length is ${currentVideoLength} seconds (${Math.floor(currentVideoLength / 60)}:${(currentVideoLength % 60).toString().padStart(2, '0')}). ALL timestamps must be within this duration.**
 
-### Current Profile:
-${currentProfileMarkdown}
+**REFINEMENT INSTRUCTIONS:**
+1. FIRST: Review the current timestamps and see how well they match: "${contextNotes}"
+2. SECOND: Use the refinement notes to improve focus on the user's specific interests
+3. THIRD: Adjust timestamps to better capture content related to the user's focus areas
 
-### RelevantContext:
-${contextNotes}
+Requirements:
+- Each clip should be between ${minLength} and ${maxLength} seconds long
+- ALL timestamps must be within the video duration of ${currentVideoLength} seconds
+- **PRIORITIZE clips that directly relate to: "${contextNotes}"**
+- Incorporate the refinement notes provided
+- Ensure clips have clear start and end points with meaningful content
+- Do NOT generate timestamps that exceed the video length
 
-### Analyst Notes:
+Output Format:
+Provide timestamps in the following format for each clip:
+
+# Video Clip Timestamps
+
+## Clip 1: [Brief description of what happens in this clip]
+**Start:** [MM:SS]
+**End:** [MM:SS]
+**Duration:** [X seconds]
+
+[Continue for all ${numClips} clips]
+
+### Current Timestamps:
+${currentTimestampMarkdown}
+
+### 🎯 USER'S SPECIFIC FOCUS AREAS - PRIORITIZE THESE TOPICS:
+**"${contextNotes}"**
+
+### Refinement Notes:
 ${notes}
+
+**IMPORTANT: The refined clips you select MUST be relevant to these specific topics: "${contextNotes}". Use the refinement notes to improve focus on these areas.**
+
+### Video Length: ${currentVideoLength} seconds (${Math.floor(currentVideoLength / 60)}:${(currentVideoLength % 60).toString().padStart(2, '0')})
+### Minimum Clip Length: ${minLength} seconds
+### Maximum Clip Length: ${maxLength} seconds
+### Number of Clips Requested: ${numClips}
+
+**IMPORTANT: Double-check that all timestamps are within the ${currentVideoLength}-second video duration. The maximum possible timestamp should be ${Math.floor((currentVideoLength - 1) / 60)}:${((currentVideoLength - 1) % 60).toString().padStart(2, '0')}.**
+
+**FINAL REMINDER: The user specifically wants clips about "${contextNotes}". Make sure your refined clips directly relate to these topics. Use the refinement notes to improve focus on these specific areas.**
       `.trim();
 
       const content = await fetchFromOpenAI(prompt);
-      currentProfileMarkdown = content;
+      currentTimestampMarkdown = content;
       renderMarkdown(content);
       document.getElementById("userEnrichment").value = "";
       document.getElementById("loadingOverlay").classList.add("hidden");
-      document.getElementById("statusMessage").innerText = "✅ Profile enriched.";
+      document.getElementById("statusMessage").innerText = "✅ Timestamps refined.";
     }
 
     function enterEditMode() {
@@ -377,7 +415,7 @@ ${notes}
       const area = document.createElement("textarea");
       area.id = "editArea";
       area.className = "w-full h-96 p-3 border border-gray-600 rounded bg-gray-900 text-white font-mono";
-      area.value = currentProfileMarkdown;
+      area.value = currentTimestampMarkdown;
       document.getElementById("editControls").before(area);
 
       document.querySelector("#editControls button[onclick='enterEditMode()']").classList.add("hidden");
@@ -387,10 +425,10 @@ ${notes}
     function saveEdits() {
       const area = document.getElementById("editArea");
       if (!area) return;
-      currentProfileMarkdown = area.value;
+      currentTimestampMarkdown = area.value;
       area.remove();
       isEditing = false;
-      renderMarkdown(currentProfileMarkdown);
+      renderMarkdown(currentTimestampMarkdown);
       document.getElementById("generatedOutput").classList.remove("hidden");
 
       document.querySelector("#editControls button[onclick='enterEditMode()']").classList.remove("hidden");
@@ -398,9 +436,14 @@ ${notes}
     }
 
     function renderMarkdown(mdText) {
-        const code = document.getElementById("profileCode").value.trim();
-        const header = code ? `<h2 class="text-lg font-semibold mb-2">🆔 Profile: ${code}</h2>` : "";
-        const highlighted = mdText.replace(/INPUT HERE/g, '<mark>INPUT HERE</mark>');
+        const videoLength = document.getElementById("videoLength").value.trim();
+        const header = videoLength ? `<h2 class="text-lg font-semibold mb-2">🎬 Video Clips for ${videoLength}-second video</h2>` : "";
+        
+        // Highlight timestamps for better visibility
+        const highlighted = mdText
+            .replace(/\*\*Start:\*\* \[([0-9:]+)\]/g, '<strong class="text-emerald-400">Start:</strong> <span class="bg-emerald-900 text-emerald-100 px-2 py-1 rounded font-mono">[$1]</span>')
+            .replace(/\*\*End:\*\* \[([0-9:]+)\]/g, '<strong class="text-emerald-400">End:</strong> <span class="bg-emerald-900 text-emerald-100 px-2 py-1 rounded font-mono">[$1]</span>')
+            .replace(/\*\*Duration:\*\* \[([0-9]+) seconds\]/g, '<strong class="text-emerald-400">Duration:</strong> <span class="bg-blue-900 text-blue-100 px-2 py-1 rounded font-mono">[$1 seconds]</span>');
 
         marked.setOptions({
             gfm: true,
@@ -410,7 +453,7 @@ ${notes}
 
         const parsedContent = marked.parse(highlighted);
         
-        // Process the parsed content to add section styling
+        // Process the parsed content to add section styling for clips
         const processedContent = parsedContent
             .replace(/<h2/g, '<div class="profile-section"><h2')
             .replace(/<h2/g, '<h2 class="text-xl font-bold mt-6 mb-3 text-white"')

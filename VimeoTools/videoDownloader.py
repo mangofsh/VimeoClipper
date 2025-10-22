@@ -19,6 +19,8 @@ def fetch_metadata_as_string(video_id: str) -> str:
     url = f"{API_BASE}/videos/{video_id}"
     headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
     params = {"fields": "name,description"}
+    
+    print(f"Fetching video data...")
 
     resp = requests.get(url, headers=headers, params=params)
     resp.raise_for_status()
@@ -34,6 +36,7 @@ def download_video(video_id: str) -> str:
     Download the lowest‑res MP4 for the given Vimeo ID.
     Returns the local filename.
     """
+    print("Video Download Started")
     url = f"{API_BASE}/videos/{video_id}"
     headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
     resp = requests.get(url, headers=headers)
@@ -53,14 +56,17 @@ def download_video(video_id: str) -> str:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-    print(f"✅ Downloaded {fname}")
+    print(f"✅ Downloaded video to: {fname}")
     return fname
 
 def main():
     # Allow the video ID to be provided via env or prompt
     video_id = os.getenv("VIMEO_VIDEO_ID")
+    print(f"Defaulted to enviornemnt Video ID: {video_id}")
     if not video_id:
         video_id = input("Enter Vimeo video ID: ").strip()
+        print(f"Using user input video ID: {video_id}")
+
 
     try:
         # Fetch and display metadata
@@ -69,7 +75,6 @@ def main():
 
         # Download the video
         filename = download_video(video_id)
-        print(f"Downloaded video to: {filename}")
     except Exception as e:
         print(f"Error: {e}")
 
