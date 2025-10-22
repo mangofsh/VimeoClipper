@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: vimeo-clipper
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      - key: VIMEO_ACCESS_TOKEN
+        sync: false
