@@ -3,10 +3,10 @@ from flask import Flask, render_template, request, jsonify
 import os
 import openai
 from openai import OpenAI
-from VimeoTools import deepgramTranscriber
+from VimeoTools import DeepgramTranscriber
 import VimeoTools.videoDownloader
 from VimeoTools.videoDownloader import download_video, fetch_metadata_as_string
-from VimeoTools.deepgramTranscriber import transcribe_audio
+from VimeoTools.DeepgramTranscriber import transcribe_audio
 from dotenv import load_dotenv
 
 app = Flask(__name__, template_folder="MatchMakingUI", static_folder="static")
